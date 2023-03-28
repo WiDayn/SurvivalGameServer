@@ -1,17 +1,15 @@
 package main
 
 import (
-	"SurvivalGame/internal/model"
 	"SurvivalGame/internal/server/http"
 	"SurvivalGame/internal/service"
-	"fmt"
+	"math/rand"
+	"time"
 )
 
 func main() {
-	player := model.Player{
-		Username: "123",
-	}
-	fmt.Println(player)
+	rand.Seed(time.Now().Unix())
 	service.InitGame()
+	service.SaveGameDetail()
 	http.StartHTTP()
 }

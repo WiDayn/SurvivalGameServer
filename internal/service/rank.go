@@ -29,17 +29,9 @@ func calculateNewRank(A float64, B float64, SA float64) (float64, float64) {
 // UpdateRank winStat 1 -> A Win, 0 -> Draw, -1 -> B Win
 func UpdateRank(usernameA string, usernameB string, winStat int) {
 	var playerA, playerB model.Player
-	sql.Database.First(&playerA, "username = ?", usernameA)
-	sql.Database.First(&playerB, "username = ?", usernameB)
+	sql.Database.Where(model.Player{Username: usernameA}).Attrs(model.Player{ELO: 800}).FirstOrCreate(&playerA)
+	sql.Database.Where(model.Player{Username: usernameB}).Attrs(model.Player{ELO: 800}).FirstOrCreate(&playerB)
 
-	if playerA.Username == "" {
-		playerA.Username = usernameA
-		playerA.ELO = 800
-	}
-	if playerB.Username == "" {
-		playerB.Username = usernameB
-		playerB.ELO = 800
-	}
 	var SA float64
 	if winStat == 1 {
 		playerA.Win++
@@ -59,10 +51,6 @@ func UpdateRank(usernameA string, usernameB string, winStat int) {
 
 	playerA.ELO, playerB.ELO = calculateNewRank(playerA.ELO, playerB.ELO, SA)
 
-	sql.Database.Model(&model.Player{
-		Username: playerA.Username,
-	}).Updates(&playerA)
-	sql.Database.Model(&model.Player{
-		Username: playerB.Username,
-	}).Updates(&playerB)
+	sql.Database.Model(&model.Player{}).Where("username = ?", playerA.Username).Updates(&playerA)
+	sql.Database.Model(&model.Player{}).Where("username = ?", playerB.Username).Updates(&playerB)
 }
