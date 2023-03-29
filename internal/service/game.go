@@ -58,15 +58,24 @@ func JoinGame(c *gin.Context) {
 	if model.NowRecord.Status == "WAITING" {
 		// 红方为空 或 上次活跃时间在3分钟以前 或 红方用户名等于username
 		if model.NowRecord.RedPlayer == "EMPTY" ||
-			model.LastActiveTime[model.NowRecord.RedPlayer].Before(time.Now().Add(-3*time.Minute)) ||
+			model.LastActiveTime[model.NowRecord.RedPlayer].Before(time.Now().Add(-time.Minute)) ||
 			model.NowRecord.RedPlayer == username {
 			model.NowRecord.RedPlayer = username
 			response.Write(c, "RED")
 			return
 		}
 		// 蓝方为空或者上次活跃时间在3分钟以前 或 蓝方用户名等于username
-		if model.NowRecord.BluePlayer == "EMPTY" || model.LastActiveTime[model.NowRecord.BluePlayer].Before(time.Now().Add(-3*time.Minute)) {
+		if model.NowRecord.BluePlayer == "EMPTY" || model.LastActiveTime[model.NowRecord.BluePlayer].Before(time.Now().Add(-time.Minute)) {
 			model.NowRecord.BluePlayer = username
+			response.Write(c, "BLUE")
+			return
+		}
+	} else {
+		if model.NowRecord.RedPlayer == username {
+			response.Write(c, "RED")
+			return
+		}
+		if model.NowRecord.BluePlayer == username {
 			response.Write(c, "BLUE")
 			return
 		}
@@ -78,6 +87,7 @@ func JoinGame(c *gin.Context) {
 
 func CheckStatus(c *gin.Context) {
 	KickOfflinePlayer()
+	detectTimeOut()
 	UpdateBeginStatus()
 	response.Write(c, model.NowRecord.Status)
 }
@@ -85,11 +95,11 @@ func CheckStatus(c *gin.Context) {
 func KickOfflinePlayer() {
 	// 清除三分钟没有汇报过的玩家
 	if model.NowRecord.RedPlayer != "EMPTY" &&
-		model.LastActiveTime[model.NowRecord.RedPlayer].Before(time.Now().Add(-3*time.Minute)) {
+		model.LastActiveTime[model.NowRecord.RedPlayer].Before(time.Now().Add(-time.Minute)) {
 		model.NowRecord.RedPlayer = "EMPTY"
 	}
 	if model.NowRecord.BluePlayer != "EMPTY" &&
-		model.LastActiveTime[model.NowRecord.BluePlayer].Before(time.Now().Add(-3*time.Minute)) {
+		model.LastActiveTime[model.NowRecord.BluePlayer].Before(time.Now().Add(-time.Minute)) {
 		model.NowRecord.BluePlayer = "EMPTY"
 	}
 }
@@ -140,6 +150,7 @@ func NowCoin(c *gin.Context) {
 
 func UpdateBeginStatus() {
 	if model.NowRecord.BluePlayer != "EMPTY" && model.NowRecord.RedPlayer != "EMPTY" && model.NowRecord.Status == "WAITING" {
+		model.NowRecord.StartTime = time.Now()
 		model.NowRecord.Status = "BLUE"
 	}
 }
@@ -290,6 +301,27 @@ func SaveGameDetail() {
 	err = newFile.Close()
 	if err != nil {
 		log.Printf(err.Error())
+		return
+	}
+}
+
+func detectTimeOut() {
+	if model.NowRecord.Status == "WAITING" {
+		return
+	}
+	if model.LastActiveTime[model.NowRecord.RedPlayer].Before(time.Now().Add(-30 * time.Second)) {
+		fmt.Println("RED TIME OUT")
+		model.NowRecord.FinalResult = "BLUE WIN"
+		model.NowRecord.Explain = "RED TIME OUT"
+	}
+	if model.LastActiveTime[model.NowRecord.BluePlayer].Before(time.Now().Add(-30 * time.Second)) {
+		fmt.Println("BLUE TIME OUT")
+		model.NowRecord.FinalResult = "RED WIN"
+		model.NowRecord.Explain = "BLUE TIME OUT"
+	}
+	if model.NowRecord.FinalResult != "" {
+		// 进入游戏结算
+		settleGame()
 		return
 	}
 }
