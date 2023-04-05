@@ -7,6 +7,7 @@ import (
 
 var NowRecord Record
 var LastActiveTime = map[string]time.Time{}
+var LastResult string
 
 type Map struct {
 	MapSize int     // 地图大小

@@ -88,6 +88,11 @@ func UpdateOPToMap(op string) {
 				return
 			}
 			mp[x][y] += id
+			if model.NowRecord.Status == "RED" {
+				dt.RedStatus.Score += 2
+			} else {
+				dt.BlueStatus.Score += 2
+			}
 		} else {
 			_, err := fmt.Fscanf(reader, "%d%d%d%d", &x, &y, &tox, &toy)
 			if err != nil {
@@ -97,7 +102,7 @@ func UpdateOPToMap(op string) {
 				TurnLoss(model.NowRecord.Status, "ERROR : There are no soldiers you can move in this position!")
 				return
 			}
-			if se*3+1 <= mp[tox][toy]%10 && mp[tox][toy]%10 <= (se+1)*3 {
+			if se*3+1 <= mp[tox][toy]%10 && mp[tox][toy]%10 <= (se+1)*3 && mp[x][y]%10 != 3 && mp[x][y]%10 != 6 {
 				TurnLoss(model.NowRecord.Status, "ERROR : You can't attack your own soldiers!")
 				return
 			}
@@ -141,9 +146,11 @@ func UpdateOPToMap(op string) {
 	dt.Map.Stat = mp
 	if model.NowRecord.Status == "RED" {
 		dt.RedStatus.Coin = coin
+		dt.RedStatus.Score += shadi * 5
 		dt.RedStatus.Kill += shadi
 	} else {
 		dt.BlueStatus.Coin = coin
+		dt.BlueStatus.Score += shadi * 5
 		dt.BlueStatus.Kill += shadi
 	}
 	model.NowRecord.RoundDetail[nowRound] = dt

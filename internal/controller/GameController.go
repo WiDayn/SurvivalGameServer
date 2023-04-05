@@ -14,4 +14,5 @@ func GameController(router *gin.Engine) {
 	router.GET("/CheckRedPlayer", middleware.UpdateActiveMiddleware(), service.CheckRedPlayer)
 	router.GET("/CheckBluePlayer", middleware.UpdateActiveMiddleware(), service.CheckBluePlayer)
 	router.GET("/UpdateStatus", middleware.UpdateActiveMiddleware(), service.UpdateStatus)
+	router.GET("/GetResult", middleware.UpdateActiveMiddleware(), service.GetResult)
 }

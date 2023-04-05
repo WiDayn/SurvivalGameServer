@@ -148,6 +148,10 @@ func NowCoin(c *gin.Context) {
 	response.Write(c, "YOU NOT IN GAME")
 }
 
+func GetResult(c *gin.Context) {
+	response.Write(c, model.LastResult)
+}
+
 func UpdateBeginStatus() {
 	if model.NowRecord.BluePlayer != "EMPTY" && model.NowRecord.RedPlayer != "EMPTY" && model.NowRecord.Status == "WAITING" {
 		model.NowRecord.StartTime = time.Now()
@@ -223,6 +227,7 @@ func detectWin() {
 }
 
 func settleGame() {
+	model.LastResult = model.NowRecord.FinalResult
 	if model.NowRecord.FinalResult == "BLUE WIN" {
 		UpdateRank(model.NowRecord.BluePlayer, model.NowRecord.RedPlayer, 1)
 		SaveGameDetail()
@@ -243,9 +248,11 @@ func FlushMoney() {
 			if (rd.Map.Stat[i][j]/10)%10 == 1 {
 				if rd.Map.Stat[i][j]%10 != 0 && rd.Map.Stat[i][j]%10 <= 3 {
 					rd.BlueStatus.Coin += 1
+					rd.BlueStatus.Score += 1
 				}
 				if rd.Map.Stat[i][j]%10 > 3 {
 					rd.RedStatus.Coin += 1
+					rd.RedStatus.Score += 1
 				}
 			}
 		}
