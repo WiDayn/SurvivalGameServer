@@ -247,12 +247,12 @@ func FlushMoney() {
 		for j := 0; j < rd.Map.MapSize; j++ {
 			if (rd.Map.Stat[i][j]/10)%10 == 1 {
 				if rd.Map.Stat[i][j]%10 != 0 && rd.Map.Stat[i][j]%10 <= 3 {
-					rd.BlueStatus.Coin += 1
-					rd.BlueStatus.Score += 1
+					rd.BlueStatus.Coin += 3
+					rd.BlueStatus.Score += 3
 				}
 				if rd.Map.Stat[i][j]%10 > 3 {
-					rd.RedStatus.Coin += 1
-					rd.RedStatus.Score += 1
+					rd.RedStatus.Coin += 3
+					rd.RedStatus.Score += 3
 				}
 			}
 		}
